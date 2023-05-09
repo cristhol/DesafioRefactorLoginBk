@@ -24,8 +24,16 @@ router.post('/redirect-login', (req, res) => res.redirect('/login'))
 // Logout
 router.post('/logout', getLogout)
 
+router.get ('/github', passport.authenticate('github', { scope:['user:email']}), async (req, res) =>{})
+
+router.get (' /githubcallback', passport.authenticate('github', { failureRedirect: '/session/failregister' }), async (req, res) =>{
+    req.session.user = req.user;
+    res.redirect('/Products');
+})
+
 // Fail route
 router.get('*', failRoute)
+
 
 
 module.exports = router
