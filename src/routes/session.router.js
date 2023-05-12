@@ -1,8 +1,8 @@
-const { router }= require('express');
+const { Router }= require('express');
 const passport = require('passport');
 const { getIndex, getLogin, getSignup, postLogin, postSignup, getFailLogin, getFailSignup, getLogout, failRoute } = require('../controllers/controller');
 const checkAuthentication = require('../config/check');
-const router = router();
+const router = Router();
 
 
 
@@ -15,7 +15,7 @@ router.get('/login', getLogin)
 router.post('/login', passport.authenticate('login', { failureRedirect: '/faillogin' }), postLogin)
 router.get('/faillogin', getFailLogin)
 
-router.get("/github", passport.authenticate('github'));
+router.get("/session/github", passport.authenticate('github'));
 
 router.get(
   "/githubcallback",  passport.authenticate("github", { failureRedirect: "/session/failregister" }),
