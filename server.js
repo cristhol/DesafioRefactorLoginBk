@@ -1,12 +1,13 @@
 const express = require('express');
 const session = require('express-session')
 const { engine } = require('express-handlebars');
-const router = require('./src/routes/router');
+const router = require('./src/routes/session.router');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
-
+const { initializePassport } = require('./src/config/passport.config');
 
 const MongoStore = require('connect-mongo')
+
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true }
 
 const ContenedorProductos = require('./src/class/Products')
@@ -35,9 +36,12 @@ app.use(session({
     cookie: { maxAge: 60000 }
 }))
 
+
+
 /* ------ Socket.io ------ */
 const { Server: HttpServer } = require('http')
-const { Server: Socket } = require('socket.io')
+const { Server: Socket } = require('socket.io');
+
 const httpServer = new HttpServer(app)
 const io = new Socket(httpServer)
 
@@ -46,14 +50,16 @@ const io = new Socket(httpServer)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(passport.initialize())
-app.use(passport.session())
 
 app.use(cookieParser())
 app.use(express.static('views'));
 app.engine('handlebars', engine())
 app.set('views', './views');
 app.set('view engine', 'handlebars')
+
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/api/productos-test', routerProductos) // --> esta ruta trae 5 productos random de faker js. Despues se fetchea en el index.js y se renderizan los productos. IMPORTANTE: SI NO PONEMOS ESTO ARRIBA DEL APP.USE(router) SE ROMPE LA RUTA.
 
@@ -75,6 +81,8 @@ io.on('connection', async socket => {
         io.sockets.emit('mensajes', await controllerMensajes.getAll());
     })
 });
+
+
 
 
 

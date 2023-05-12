@@ -1,7 +1,10 @@
-const router = require('express').Router()
-const passport = require('passport')
-const { getIndex, getLogin, getSignup, postLogin, postSignup, getFailLogin, getFailSignup, getLogout, failRoute } = require('../controllers/controller')
-const checkAuthentication = require('../middlewares/auth')
+const { router }= require('express');
+const passport = require('passport');
+const { getIndex, getLogin, getSignup, postLogin, postSignup, getFailLogin, getFailSignup, getLogout, failRoute } = require('../controllers/controller');
+const checkAuthentication = require('../config/check');
+const router = router();
+
+
 
 
 // Index
@@ -12,6 +15,18 @@ router.get('/login', getLogin)
 router.post('/login', passport.authenticate('login', { failureRedirect: '/faillogin' }), postLogin)
 router.get('/faillogin', getFailLogin)
 
+router.get("/github", passport.authenticate('github'));
+
+router.get(
+  "/githubcallback",  passport.authenticate("github", { failureRedirect: "/session/failregister" }),
+  (req, res) => {
+    req.session.user = req.user;
+    res.redirect("/api/productos");
+  }
+);
+
+
+
 // Signup
 router.get('/signup', getSignup)
 router.post('/signup', passport.authenticate('signup', { failureRedirect: '/failsignup' }), postSignup)
@@ -21,15 +36,12 @@ router.get('/failsignup', getFailSignup)
 router.post('/redirect-signup', (req, res) => res.redirect('/signup'))
 router.post('/redirect-login', (req, res) => res.redirect('/login'))
 
+
+
 // Logout
 router.post('/logout', getLogout)
 
-router.get ('/github', passport.authenticate('github', { scope:['user:email']}), async (req, res) =>{})
 
-router.get (' /githubcallback', passport.authenticate('github', { failureRedirect: '/session/failregister' }), async (req, res) =>{
-    req.session.user = req.user;
-    res.redirect('/Products');
-})
 
 // Fail route
 router.get('*', failRoute)
